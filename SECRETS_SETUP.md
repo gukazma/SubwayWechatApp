@@ -50,7 +50,9 @@ iHqGPIjkiqYVUBHSK2trAAAAFWdpdGh1Yi1hY3Rpb25zLWRlcGxveQ==
 
 ### 步骤 2: 将公钥添加到服务器
 
-**方式 1: 自动添加（推荐）**
+> **🪟 Windows 用户**: `ssh-copy-id` 命令在 Windows 上不可用，请查看 [WINDOWS_SSH_SETUP.md](WINDOWS_SSH_SETUP.md) 获取 Windows 专用配置方法！
+
+**方式 1: 自动添加（Linux/Mac）**
 
 在本地执行以下命令（需要先能用密码 SSH 登录服务器）:
 
@@ -59,7 +61,15 @@ iHqGPIjkiqYVUBHSK2trAAAAFWdpdGh1Yi1hY3Rpb25zLWRlcGxveQ==
 ssh-copy-id -i ~/.ssh/github_deploy.pub your-username@your-server-ip
 ```
 
-**方式 2: 手动添加**
+**方式 2: 使用 PowerShell（Windows 推荐）⭐**
+
+```powershell
+# 替换为您的服务器信息
+$pubKey = Get-Content ~/.ssh/github_deploy.pub
+ssh your-username@your-server-ip "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '$pubKey' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+```
+
+**方式 3: 手动添加（通用方式）**
 
 如果自动添加失败，手动操作：
 
