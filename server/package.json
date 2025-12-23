@@ -1,0 +1,24 @@
+{
+  "name": "subway-wechat-server",
+  "version": "1.0.0",
+  "description": "Backend server for Subway WeChat Mini Program",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "prod": "cross-env NODE_ENV=production node index.js",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop ecosystem.config.js",
+    "pm2:restart": "pm2 restart ecosystem.config.js",
+    "pm2:delete": "pm2 delete ecosystem.config.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "cross-env": "^7.0.3"
+  }
+}

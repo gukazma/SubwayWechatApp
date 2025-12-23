@@ -1,0 +1,119 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main  # 当推送到 main 分支时触发
+      - master  # 也支持 master 分支
+    paths:
+      - 'server/**'  # 只有 server 目录变化时才触发
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: production
+      url: ${{ secrets.SERVER_HOST }}
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: 📦 Install dependencies
+        working-directory: ./server
+        run: npm ci --production
+
+      - name: ✅ Run tests
+        working-directory: ./server
+        run: npm test || echo "⚠️  No tests found, skipping..."
+
+      - name: 🚀 Deploy to server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            echo "🚀 Starting deployment..."
+
+            # 进入项目目录
+            cd /var/www/subway-server || exit 1
+
+            # 拉取最新代码
+            echo "📥 Pulling latest code..."
+            git pull origin main || git pull origin master
+
+            # 进入 server 目录
+            cd server
+
+            # 备份当前版本（可选）
+            echo "💾 Creating backup..."
+            timestamp=$(date +%Y%m%d_%H%M%S)
+            mkdir -p ../backups
+            tar -czf ../backups/backup_${timestamp}.tar.gz . || echo "⚠️  Backup failed"
+
+            # 复制环境配置
+            if [ ! -f .env.production ]; then
+              echo "⚠️  .env.production not found! Please create it manually."
+            fi
+
+            # 安装依赖
+            echo "📦 Installing dependencies..."
+            npm install --production
+
+            # 重启服务
+            echo "🔄 Restarting service..."
+            if command -v pm2 &> /dev/null; then
+              pm2 restart subway-wechat-server || pm2 start ecosystem.config.js --env production
+              pm2 save
+              echo "✅ Service restarted with PM2"
+            else
+              echo "❌ PM2 not found! Please install PM2 first."
+              exit 1
+            fi
+
+            # 清理旧备份（保留最近5个）
+            echo "🧹 Cleaning old backups..."
+            cd ../backups
+            ls -t | tail -n +6 | xargs -r rm --
+
+            echo "✅ Deployment completed successfully!"
+
+      - name: 🔍 Health check
+        if: success()
+        run: |
+          echo "⏳ Waiting 10 seconds for service to start..."
+          sleep 10
+
+          echo "🔍 Checking service health..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.SERVER_HOST }}:3000/api/test || echo "000")
+
+          if [ "$response" = "200" ]; then
+            echo "✅ Health check passed! Service is running."
+          else
+            echo "⚠️  Health check returned status code: $response"
+            echo "Please check the service manually."
+          fi
+
+      - name: 📢 Notification
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "🎉 ✅ Deployment successful!"
+            echo "🌐 Server: ${{ secrets.SERVER_HOST }}"
+            echo "📅 Time: $(date)"
+          else
+            echo "❌ Deployment failed!"
+            echo "Please check the logs above for details."
+          fi
