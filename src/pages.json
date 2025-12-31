@@ -1,0 +1,79 @@
+{
+	"pages": [
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationBarTitleText": "登录",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "首页"
+			}
+		},
+		{
+			"path": "pages/stations/detail",
+			"style": {
+				"navigationBarTitleText": "站点详情"
+			}
+		},
+		{
+			"path": "pages/entrances/list",
+			"style": {
+				"navigationBarTitleText": "出入口列表"
+			}
+		},
+		{
+			"path": "pages/booking/confirm",
+			"style": {
+				"navigationBarTitleText": "报名确认"
+			}
+		},
+		{
+			"path": "pages/mine/index",
+			"style": {
+				"navigationBarTitleText": "我的"
+			}
+		},
+		{
+			"path": "pages/mine/supports",
+			"style": {
+				"navigationBarTitleText": "我的支援"
+			}
+		},
+		{
+			"path": "pages/mine/profile",
+			"style": {
+				"navigationBarTitleText": "个人信息"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "地铁站支援",
+		"navigationBarBackgroundColor": "#007AFF",
+		"backgroundColor": "#F8F8F8"
+	},
+	"tabBar": {
+		"color": "#7A7E83",
+		"selectedColor": "#007AFF",
+		"borderStyle": "black",
+		"backgroundColor": "#ffffff",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"iconPath": "static/home.png",
+				"selectedIconPath": "static/home-active.png",
+				"text": "首页"
+			},
+			{
+				"pagePath": "pages/mine/index",
+				"iconPath": "static/mine.png",
+				"selectedIconPath": "static/mine-active.png",
+				"text": "我的"
+			}
+		]
+	}
+}
